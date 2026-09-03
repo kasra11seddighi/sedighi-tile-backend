@@ -1,35 +1,70 @@
 import "dotenv/config";
 import { z } from "zod";
 
+const optionalString = z.preprocess(
+  (value) => (typeof value === "string" ? value.trim() : value),
+  z.string().default(""),
+);
+
 const envSchema = z.object({
-  PORT: z.coerce.number().default(5000),
-  NODE_ENV: z.string().default("production"),
-  MONGO_URI: z.string().min(1, "MONGO_URI الزامی است"),
-  JWT_SECRET: z.string().min(1, "JWT_SECRET الزامی است"),
-  JWT_EXPIRES_IN: z.string().default("7d"),
-  CLIENT_URL: z.string().default("*"),
+  PORT: z.coerce.number().int().positive().default(3000),
 
-  AI_API_URL: z.string().default(""),
-  AI_API_KEY: z.string().default(""),
+  NODE_ENV: z.enum(["development", "test", "production"]).default("production"),
 
-  SMS_API_URL: z.string().default(""),
-  SMS_API_KEY: z.string().default(""),
-  SMS_SENDER_NUMBER: z.string().default(""),
+  MONGO_URI: z
+    .string()
+    .trim()
+    .min(1, "MONGO_URI الزامی است")
+    .refine(
+      (value) =>
+        value.startsWith("mongodb://") || value.startsWith("mongodb+srv://"),
+      "MONGO_URI باید با mongodb:// یا mongodb+srv:// شروع شود",
+    ),
 
-  OTP_EXPIRES_IN_SECONDS: z.coerce.number().default(120),
-  OTP_RESEND_COOLDOWN_SECONDS: z.coerce.number().default(60),
-  OTP_MAX_ATTEMPTS: z.coerce.number().default(5),
+  JWT_SECRET: z
+    .string()
+    .trim()
+    .min(32, "JWT_SECRET باید حداقل 32 کاراکتر باشد"),
 
-  ZARINPAL_MERCHANT_ID: z.string().default(""),
-  ZARINPAL_CALLBACK_URL: z.string().default(""),
-  ZARINPAL_SANDBOX: z.coerce.boolean().default(true),
+  JWT_EXPIRES_IN: z.string().trim().default("7d"),
+
+  CLIENT_URL: z.string().trim().default("*"),
+
+  AI_API_URL: optionalString,
+  AI_API_KEY: optionalString,
+
+  SMS_API_URL: optionalString,
+  SMS_API_KEY: optionalString,
+  SMS_SENDER_NUMBER: optionalString,
+
+  OTP_EXPIRES_IN_SECONDS: z.coerce.number().int().positive().default(120),
+
+  OTP_RESEND_COOLDOWN_SECONDS: z.coerce
+    .number()
+    .int()
+    .nonnegative()
+    .default(60),
+
+  OTP_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
+
+  ZARINPAL_MERCHANT_ID: optionalString,
+  ZARINPAL_CALLBACK_URL: optionalString,
+
+  ZARINPAL_SANDBOX: z
+    .enum(["true", "false"])
+    .default("true")
+    .transform((value) => value === "true"),
 });
 
 const parsed = envSchema.safeParse(process.env);
 
 if (!parsed.success) {
-  console.error("❌ متغیرهای محیطی نامعتبر هستند:");
-  console.error(JSON.stringify(parsed.error.flatten().fieldErrors, null, 2));
+  console.error("Invalid environment variables:");
+
+  for (const issue of parsed.error.issues) {
+    console.error(`- ${issue.path.join(".")}: ${issue.message}`);
+  }
+
   process.exit(1);
 }
 
