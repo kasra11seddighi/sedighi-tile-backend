@@ -4,20 +4,26 @@ import { env } from "./config/env";
 import { User } from "./models/User.model";
 
 const start = async (): Promise<void> => {
-  await connectDB();
+  try {
+    const app = createApp();
 
-  // فقط توی dev: ایندکس‌های کالکشن users رو با اسکیمای فعلی sync می‌کنیم
-  // تا ایندکس‌های قدیمیِ حذف‌شده از مدل (مثل email که قبلاً بوده و پاک شده)
-  // توی خودِ دیتابیس باقی نمونن و باعث خطای duplicate key نشن.
-  if (env.NODE_ENV !== "production") {
-    await User.syncIndexes();
+    const port = Number(env.PORT) || 3000;
+
+    app.listen(port, "0.0.0.0", () => {
+      console.log(`🚀 Server running on port ${port}`);
+    });
+
+    await connectDB();
+    console.log("✅ MongoDB connected successfully");
+
+    if (env.NODE_ENV !== "production") {
+      await User.syncIndexes();
+      console.log("✅ User indexes synchronized");
+    }
+  } catch (error) {
+    console.error("❌ Application startup failed:", error);
+    process.exit(1);
   }
-
-  const app = createApp();
-
-  app.listen(env.PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${env.PORT}`);
-  });
 };
 
-start();
+void start();
