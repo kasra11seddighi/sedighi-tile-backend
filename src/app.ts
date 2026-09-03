@@ -29,11 +29,6 @@ import projectCategoryRoutes from "./routes/projectCategory.routes";
 export const createApp = (): Express => {
   const app = express();
 
-  // CLIENT_URL می‌تونه چند آدرس، جدا با کاما، باشه (مثلاً فرانت فروشگاه +
-  // پنل مدیریت که یه اپ کاملاً جداست): CLIENT_URL=http://localhost:5173,http://localhost:5174
-  // قبلاً فقط یه origin رو قبول می‌کرد و درخواست از origin دومی (مثلاً پنل
-  // مدیریت رو یه پورت دیگه) با خطای CORS رد می‌شد - همون چیزی که باعث
-  // «ارسال کد با خطا مواجه شد» تو فرانت می‌شد چون اصلاً پاسخی به مرورگر نمی‌رسید.
   const allowedOrigins = env.CLIENT_URL.split(",")
     .map((url) => url.trim())
     .filter(Boolean);
@@ -41,8 +36,11 @@ export const createApp = (): Express => {
   app.use(
     cors({
       origin: (origin, callback) => {
-        // درخواست‌های بدون origin (مثل curl/Postman) یا وقتی CLIENT_URL="*"ه
-        if (!origin || allowedOrigins.includes("*") || allowedOrigins.includes(origin)) {
+        if (
+          !origin ||
+          allowedOrigins.includes("*") ||
+          allowedOrigins.includes(origin)
+        ) {
           callback(null, true);
         } else {
           callback(new Error("این origin توسط CORS مجاز نیست."));
@@ -53,21 +51,31 @@ export const createApp = (): Express => {
   app.use(express.json());
   app.use(morgan("dev"));
 
+  // روت‌های سلامت و ریشه
+  app.get("/", (_req, res) => {
+    res.status(200).json({
+      status: "online",
+      message: "Sedighi Tile API is running successfully 🚀",
+      docs: "/api-docs",
+    });
+  });
+
+  app.get("/health", (_req, res) => {
+    res.status(200).json({ success: true, status: "healthy" });
+  });
+
   app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
   app.use("/api/settings", settingRoutes);
 
-  // فایل‌های استاتیک (تصاویر محصولات و غیره)
+  // فایل‌های استاتیک
   app.use(express.static("public"));
 
   app.use("/api/home", homeRoutes);
   app.use("/api/brands", brandRoutes);
 
-  // توجه: tile-finder عمداً بدون پیشوند /api mount شده
-  // چون فرانت فعلی همین مسیر را صدا می‌زند.
   app.use("/tile-finder", tileFinderRoutes);
 
-  // سلامت سرور
   app.get("/api/health", (_req, res) => {
     res.status(200).json({ success: true, message: "سرور فعال است 🚀" });
   });
@@ -84,18 +92,8 @@ export const createApp = (): Express => {
   app.use("/api/faqs", faqRoutes);
   app.use("/api/comments", commentRoutes);
 
-  // مدیریت گزینه‌های کاشی‌یاب از پنل ادمین (فضا/سایز/سبک/رنگ)
-  // جدا از /tile-finder عمومی که فقط خواندنی و برای ویزارد فرانت است
   app.use("/api/tile-finder-options", tileFinderOptionRoutes);
-
-  // مدیریت گزینه‌های مرتب‌سازی محصولات از پنل ادمین (لیست کامل + CRUD)
-  // جدا از /api/products/sort-options عمومی که فقط خواندنی و برای
-  // دراپ‌داون مرتب‌سازی صفحه‌ی محصولات است
   app.use("/api/product-sort-options", productSortOptionRoutes);
-
-  // مدیریت دسته‌بندی‌های پروژه از پنل ادمین (لیست کامل + CRUD)
-  // جدا از /api/projects/categories عمومی که فقط خواندنی و برای
-  // فیلتر دسته‌بندی صفحه‌ی پروژه‌هاست
   app.use("/api/project-categories", projectCategoryRoutes);
 
   app.use(notFound);
