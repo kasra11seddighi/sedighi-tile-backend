@@ -2,11 +2,11 @@
   "name": "sedighi-tile-backend",
   "version": "1.0.0",
   "description": "بک‌اند نمایندگی صدیقی — کاشی و سرامیک (TypeScript, Express, MongoDB)",
-  "main": "dist/server.js",
+  "main": "dist/src/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/server.js",
+    "start": "node dist/src/server.js",
     "seed:tilefinder": "ts-node src/seeds/tileFinder.seed.ts",
     "seed:setting": "ts-node src/seeds/setting.seed.ts",
     "cleanup:uploads": "ts-node src/scripts/cleanupOldUploads.ts",
