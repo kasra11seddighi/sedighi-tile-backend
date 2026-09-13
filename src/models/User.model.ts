@@ -23,7 +23,7 @@ export interface IUser extends Document {
   name: string;
   phone: string;
   role: UserRole;
-  addresses: IAddress[];
+  addresses: Types.DocumentArray<IAddress>;
   createdAt: Date;
   updatedAt: Date;
 }

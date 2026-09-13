@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { Product } from "../models/Product.model";
 import { Brand } from "../models/Brand.model";
 import { TileFinderLocation } from "../models/TileFinderLocation.model";
@@ -63,7 +64,7 @@ export const getBrands = async (): Promise<FinderOption[]> => {
 
   return [
     { id: "all", title: "همه برندها", value: "" },
-    ...brands.map((brand) => ({
+    ...brands.map((brand: { _id: Types.ObjectId; name: string; logo: string }) => ({
       id: brand._id.toString(),
       title: brand.name,
       value: brand._id.toString(),

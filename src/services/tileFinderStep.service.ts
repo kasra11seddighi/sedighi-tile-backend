@@ -99,7 +99,7 @@ export const getActiveStepsWithOptions = async () => {
 
       let options = cache.get(step.source);
       if (!options) {
-        options = await optionLoaders[step.source]();
+        options = (await optionLoaders[step.source]()) as NormalizedOption[];
         cache.set(step.source, options);
       }
 
