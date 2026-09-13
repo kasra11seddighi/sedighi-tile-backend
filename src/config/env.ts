@@ -30,12 +30,18 @@ const envSchema = z.object({
 
   CLIENT_URL: z.string().trim().default("*"),
 
+  // آدرس عمومی سایت (بدون اسلش انتهایی) - برای ساخت URLهای مطلق در sitemap.xml
+  SITE_URL: z.string().trim().default("https://kashiseddighi.ir"),
+
+  // دامنه‌ی کوکی احراز هویت؛ فقط در صورتی لازمه که فرانت و بک‌اند روی
+  // ساب‌دامین‌های یک دامنه‌ی مشترک باشن (مثلاً api.example.com و example.com)
+  COOKIE_DOMAIN: optionalString,
+
   AI_API_URL: optionalString,
   AI_API_KEY: optionalString,
 
-  SMS_API_URL: optionalString,
-  SMS_API_KEY: optionalString,
-  SMS_SENDER_NUMBER: optionalString,
+  // ملی‌پیامک - توکن اختصاصی سرویس «OTP کنسول» (console.melipayamak.com)
+  MELIPAYAMAK_OTP_TOKEN: optionalString,
 
   OTP_EXPIRES_IN_SECONDS: z.coerce.number().int().positive().default(120),
 
@@ -46,6 +52,13 @@ const envSchema = z.object({
     .default(60),
 
   OTP_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
+
+  // فقط برای محیط توسعه/تست: اگه این شماره ست بشه، وقتی همین شماره وارد
+  // بشه به‌جای ارسال پیامک واقعی یه کد ثابت (TEST_OTP_CODE) استفاده می‌شه.
+  // در NODE_ENV=production این قابلیت کاملاً غیرفعاله، حتی اگه این
+  // مقادیر تو .env ست شده باشن - پس خطری برای محیط واقعی نداره.
+  TEST_OTP_PHONE: optionalString,
+  TEST_OTP_CODE: optionalString,
 
   ZARINPAL_MERCHANT_ID: optionalString,
   ZARINPAL_CALLBACK_URL: optionalString,

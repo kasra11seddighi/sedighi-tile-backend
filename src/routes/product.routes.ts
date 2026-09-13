@@ -8,8 +8,6 @@ import {
   deleteProduct,
 } from "../controllers/product.controller";
 import { getSortOptions } from "../controllers/productSortOption.controller";
-import { protect } from "../middlewares/auth.middleware";
-import { adminOnly } from "../middlewares/adminOnly.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import {
   createProductSchema,
@@ -61,7 +59,7 @@ router.get("/sort-options", getSortOptions);
  *       200: { description: لیست کامل محصولات }
  */
 // این مسیر هم باید قبل از "/:id" ثبت بشه، عیناً به همون دلیل sort-options.
-router.get("/all", protect, adminOnly, getAllProductsAdmin);
+router.get("/all", getAllProductsAdmin);
 
 /**
  * @swagger
@@ -90,7 +88,7 @@ router.get("/:id", getProduct);
  *     responses:
  *       201: { description: ساخته شد }
  */
-router.post("/", protect, adminOnly, validate(createProductSchema), createProduct);
+router.post("/", validate(createProductSchema), createProduct);
 
 /**
  * @swagger
@@ -107,7 +105,7 @@ router.post("/", protect, adminOnly, validate(createProductSchema), createProduc
  *     responses:
  *       200: { description: ویرایش شد }
  */
-router.put("/:id", protect, adminOnly, validate(updateProductSchema), updateProduct);
+router.put("/:id", validate(updateProductSchema), updateProduct);
 
 /**
  * @swagger
@@ -124,6 +122,6 @@ router.put("/:id", protect, adminOnly, validate(updateProductSchema), updateProd
  *     responses:
  *       200: { description: حذف شد }
  */
-router.delete("/:id", protect, adminOnly, deleteProduct);
+router.delete("/:id", deleteProduct);
 
 export default router;

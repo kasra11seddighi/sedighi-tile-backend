@@ -14,9 +14,9 @@ export const getCategoryById = async (id: string) => {
   return category;
 };
 
-export const createCategory = async ({ name, description }: CreateCategoryInput) => {
+export const createCategory = async ({ name, description, showPrice }: CreateCategoryInput) => {
   const slug = slugify(name);
-  return Category.create({ name, description, slug });
+  return Category.create({ name, description, showPrice, slug });
 };
 
 export const updateCategory = async (id: string, data: UpdateCategoryInput) => {

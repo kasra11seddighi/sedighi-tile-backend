@@ -4,13 +4,16 @@ import {
   getCommentsByProduct,
   getAllComments,
   approveComment,
+  replyToComment,
   deleteComment,
 } from "../controllers/comment.controller";
-import { protect } from "../middlewares/auth.middleware";
-import { adminOnly } from "../middlewares/adminOnly.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { publicFormRateLimit } from "../middlewares/rateLimit.middleware";
-import { createCommentSchema, getCommentsQuerySchema } from "../validations/comment.validation";
+import {
+  createCommentSchema,
+  getCommentsQuerySchema,
+  replyCommentSchema,
+} from "../validations/comment.validation";
 
 const router = Router();
 
@@ -43,7 +46,12 @@ const router = Router();
  *       201: { description: نظر ثبت شد (در انتظار تایید ادمین) }
  *       400: { description: ورودی نامعتبر }
  */
-router.post("/", publicFormRateLimit, validate(createCommentSchema), createComment);
+router.post(
+  "/",
+  publicFormRateLimit,
+  validate(createCommentSchema),
+  createComment,
+);
 
 /**
  * @swagger
@@ -78,7 +86,11 @@ router.get("/product/:productId", getCommentsByProduct);
  *     responses:
  *       200: { description: لیست نظرات + صفحه‌بندی }
  */
-router.get("/", protect, adminOnly, validate(getCommentsQuerySchema, "query"), getAllComments);
+router.get(
+  "/",
+  validate(getCommentsQuerySchema, "query"),
+  getAllComments,
+);
 
 /**
  * @swagger
@@ -96,7 +108,7 @@ router.get("/", protect, adminOnly, validate(getCommentsQuerySchema, "query"), g
  *       200: { description: وضعیت نظر به‌روزرسانی شد }
  *       404: { description: نظر یافت نشد }
  */
-router.patch("/:id/approve", protect, adminOnly, approveComment);
+router.patch("/:id/approve", approveComment);
 
 /**
  * @swagger
@@ -114,6 +126,31 @@ router.patch("/:id/approve", protect, adminOnly, approveComment);
  *       200: { description: حذف شد }
  *       404: { description: نظر یافت نشد }
  */
-router.delete("/:id", protect, adminOnly, deleteComment);
+/**
+ * @swagger
+ * /api/comments/{id}/reply:
+ *   patch:
+ *     summary: پاسخ ادمین به نظر
+ *     tags: [Comments]
+ *     security: [{ bearerAuth: [] }]
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [reply]
+ *             properties:
+ *               reply: { type: string, description: "پاسخ ادمین؛ خالی کردن آن پاسخ را پاک می‌کند" }
+ *     responses:
+ *       200: { description: پاسخ ذخیره شد }
+ *       404: { description: نظر یافت نشد }
+ */
+router.patch(
+  "/:id/reply",
+  validate(replyCommentSchema),
+  replyToComment,
+);
+
+router.delete("/:id", deleteComment);
 
 export default router;

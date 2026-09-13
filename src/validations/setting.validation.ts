@@ -8,6 +8,9 @@ const menuItemSchema = z.object({
 export const updateSettingSchema = z.object({
   logo: z.string().trim().min(1).optional(),
   menu: z.array(menuItemSchema).optional(),
+  headerTitle: z.string().trim().optional(),
+  headerSubtitle: z.string().trim().optional(),
+  logoImage: z.string().trim().optional(),
   description: z.string().trim().optional(),
   quickLinks: z.array(menuItemSchema).optional(),
   helpLinks: z.array(menuItemSchema).optional(),
@@ -25,6 +28,8 @@ export const updateSettingSchema = z.object({
       address: z.string().trim().optional(),
     })
     .optional(),
+  cartEnabled: z.boolean().optional(),
+  shiralatEnabled: z.boolean().optional(),
 });
 
 export type UpdateSettingInput = z.infer<typeof updateSettingSchema>;

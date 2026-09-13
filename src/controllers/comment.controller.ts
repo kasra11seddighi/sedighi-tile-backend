@@ -26,6 +26,11 @@ export const approveComment = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, data: comment });
 });
 
+export const replyToComment = asyncHandler(async (req, res) => {
+  const comment = await commentService.replyToComment(req.params.id, req.body.reply);
+  res.status(200).json({ success: true, data: comment, message: "پاسخ ذخیره شد" });
+});
+
 export const deleteComment = asyncHandler(async (req, res) => {
   await commentService.deleteComment(req.params.id);
   res.status(200).json({ success: true, message: "نظر حذف شد" });

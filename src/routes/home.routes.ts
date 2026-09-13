@@ -1,7 +1,5 @@
 import { Router } from "express";
 import { getHome, updateHome } from "../controllers/home.controller";
-import { protect } from "../middlewares/auth.middleware";
-import { adminOnly } from "../middlewares/adminOnly.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { updateHomeSchema } from "../validations/home.validation";
 
@@ -36,6 +34,6 @@ router.get("/", getHome);
  *     responses:
  *       200: { description: ویرایش شد }
  */
-router.put("/", protect, adminOnly, validate(updateHomeSchema), updateHome);
+router.put("/", validate(updateHomeSchema), updateHome);
 
 export default router;

@@ -22,3 +22,10 @@ export const getCommentsQuerySchema = z.object({
 
 export type CreateCommentInput = z.infer<typeof createCommentSchema>;
 export type GetCommentsQuery = z.infer<typeof getCommentsQuerySchema>;
+
+
+export const replyCommentSchema = z.object({
+  reply: z.string().trim().max(2000, "پاسخ نمی‌تواند بیشتر از ۲۰۰۰ کاراکتر باشد"),
+});
+
+export type ReplyCommentInput = z.infer<typeof replyCommentSchema>;

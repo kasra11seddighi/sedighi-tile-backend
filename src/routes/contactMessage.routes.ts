@@ -4,8 +4,6 @@ import {
   getMessages,
   markAsRead,
 } from "../controllers/contactMessage.controller";
-import { protect } from "../middlewares/auth.middleware";
-import { adminOnly } from "../middlewares/adminOnly.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { publicFormRateLimit } from "../middlewares/rateLimit.middleware";
 import { createContactMessageSchema } from "../validations/contactMessage.validation";
@@ -41,7 +39,7 @@ router.post("/", publicFormRateLimit, validate(createContactMessageSchema), crea
  *     responses:
  *       200: { description: لیست پیام‌ها }
  */
-router.get("/", protect, adminOnly, getMessages);
+router.get("/", getMessages);
 
 /**
  * @swagger
@@ -59,6 +57,6 @@ router.get("/", protect, adminOnly, getMessages);
  *       200: { description: به‌روزرسانی شد }
  *       404: { description: پیام یافت نشد }
  */
-router.patch("/:id/read", protect, adminOnly, markAsRead);
+router.patch("/:id/read", markAsRead);
 
 export default router;

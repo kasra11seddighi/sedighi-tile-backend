@@ -9,12 +9,12 @@ interface JwtPayload {
 }
 
 export const protect = asyncHandler(async (req, _res, next) => {
-  let token: string | undefined;
+  // توکن از هدر Authorization خونده می‌شه: "Bearer <token>"
   const authHeader = req.headers.authorization;
-
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    token = authHeader.split(" ")[1];
-  }
+  const token =
+    authHeader && authHeader.startsWith("Bearer ")
+      ? authHeader.slice(7)
+      : undefined;
 
   if (!token) {
     throw new ApiError(401, "دسترسی غیرمجاز. توکن ارسال نشده است.");

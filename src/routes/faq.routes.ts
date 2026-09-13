@@ -6,8 +6,6 @@ import {
   updateFaq,
   deleteFaq,
 } from "../controllers/faq.controller";
-import { protect } from "../middlewares/auth.middleware";
-import { adminOnly } from "../middlewares/adminOnly.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { createFaqSchema, updateFaqSchema } from "../validations/faq.validation";
 
@@ -41,7 +39,7 @@ router.get("/", getPublicFaqs);
  *     responses:
  *       200: { description: لیست کامل سوالات متداول }
  */
-router.get("/all", protect, adminOnly, getAllFaqs);
+router.get("/all", getAllFaqs);
 
 /**
  * @swagger
@@ -53,7 +51,7 @@ router.get("/all", protect, adminOnly, getAllFaqs);
  *     responses:
  *       201: { description: ساخته شد }
  */
-router.post("/", protect, adminOnly, validate(createFaqSchema), createFaq);
+router.post("/", validate(createFaqSchema), createFaq);
 
 /**
  * @swagger
@@ -70,7 +68,7 @@ router.post("/", protect, adminOnly, validate(createFaqSchema), createFaq);
  *     responses:
  *       200: { description: ویرایش شد }
  */
-router.put("/:id", protect, adminOnly, validate(updateFaqSchema), updateFaq);
+router.put("/:id", validate(updateFaqSchema), updateFaq);
 
 /**
  * @swagger
@@ -87,6 +85,6 @@ router.put("/:id", protect, adminOnly, validate(updateFaqSchema), updateFaq);
  *     responses:
  *       200: { description: حذف شد }
  */
-router.delete("/:id", protect, adminOnly, deleteFaq);
+router.delete("/:id", deleteFaq);
 
 export default router;

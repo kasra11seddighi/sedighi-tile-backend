@@ -58,6 +58,22 @@ export const approveComment = async (id: string, isApproved: boolean) => {
   return comment;
 };
 
+export const replyToComment = async (id: string, reply: string) => {
+  const normalizedReply = reply.trim();
+
+  const update = normalizedReply
+    ? { $set: { adminReply: normalizedReply, repliedAt: new Date() } }
+    : { $set: { adminReply: "" }, $unset: { repliedAt: 1 } };
+
+  const comment = await Comment.findByIdAndUpdate(id, update, { new: true });
+
+  if (!comment) {
+    throw new ApiError(404, "نظر یافت نشد");
+  }
+
+  return comment;
+};
+
 export const deleteComment = async (id: string) => {
   const comment = await Comment.findByIdAndDelete(id);
   if (!comment) {

@@ -3,6 +3,21 @@ import { SORT_OPTION_VALUES } from "../models/ProductSortOption.model";
 
 const objectId = z.string().regex(/^[0-9a-fA-F]{24}$/, "شناسه نامعتبر است");
 
+// رنگ‌های مستقل محصول - هر کدوم کد و موجودی جدا داره (نه فقط برای نمایش عکس)
+const colorVariantSchema = z.object({
+  name: z.string().trim().min(1, "نام رنگ الزامی است"),
+  hex: z.string().trim().optional(),
+  image: z.string().trim().optional(),
+  code: z.string().trim().min(1, "کد رنگ الزامی است"),
+  stock: z.coerce.number().min(0, "موجودی نمی‌تواند منفی باشد").optional(),
+});
+
+// مقدار محصول برای یک مرحله‌ی سفارشی فایندر کاشی
+const customAttributeSchema = z.object({
+  step: objectId,
+  options: z.array(objectId),
+});
+
 // --- فروش متری/کارتنی ---
 // همه اختیاری‌اند: محصولی که saleUnit نداره، دقیقاً مثل قبل با price ساده فروخته می‌شه
 const tileSaleFields = {
@@ -13,6 +28,24 @@ const tileSaleFields = {
   tileWidth: z.coerce.number().positive("عرض کاشی باید بزرگ‌تر از صفر باشد").optional(),
   tileHeight: z.coerce.number().positive("ارتفاع کاشی باید بزرگ‌تر از صفر باشد").optional(),
   saleUnit: z.enum(["m2", "carton", "both"]).optional(),
+};
+
+// --- مشخصات فنی نمایشی (جدول «مشخصات فنی» توی صفحه‌ی محصول) ---
+// همه اختیاری‌اند؛ هر دسته‌بندی زیرمجموعه‌ی متفاوتی از این‌ها رو پر می‌کنه.
+const productSpecFields = {
+  glazeType: z.string().trim().optional(),
+  bodyMaterial: z.string().trim().optional(),
+  wearResistance: z.string().trim().optional(),
+  suitableFor: z.array(z.string().trim()).optional(),
+  colorDescription: z.string().trim().optional(),
+  sku: z.string().trim().optional(),
+  thickness: z.coerce.number().min(0, "ضخامت نمی‌تواند منفی باشد").optional(),
+  finish: z.string().trim().optional(),
+  qualityGrade: z.string().trim().optional(),
+  originCountry: z.string().trim().optional(),
+  weightPerCarton: z.coerce.number().min(0, "وزن هر کارتن نمی‌تواند منفی باشد").optional(),
+  waterAbsorption: z.string().trim().optional(),
+  warranty: z.string().trim().optional(),
 };
 
 // اگه saleUnit ست شده، بسته به نوعش، قیمت واحد لازم رو هم باید داشته باشیم
@@ -64,8 +97,11 @@ export const createProductSchema = z
     sizes: z.array(objectId).optional(),
     styles: z.array(objectId).optional(),
     colors: z.array(objectId).optional(),
+    customAttributes: z.array(customAttributeSchema).optional(),
+    colorVariants: z.array(colorVariantSchema).optional(),
     isActive: z.boolean().optional(),
     ...tileSaleFields,
+    ...productSpecFields,
   })
   .superRefine(validateSaleUnitConsistency);
 
@@ -83,14 +119,18 @@ export const updateProductSchema = z
     sizes: z.array(objectId).optional(),
     styles: z.array(objectId).optional(),
     colors: z.array(objectId).optional(),
+    customAttributes: z.array(customAttributeSchema).optional(),
+    colorVariants: z.array(colorVariantSchema).optional(),
     isActive: z.boolean().optional(),
     ...tileSaleFields,
+    ...productSpecFields,
   })
   .superRefine(validateSaleUnitConsistency);
 
 export const getProductsQuerySchema = z.object({
   search: z.string().trim().optional(),
   category: objectId.optional(),
+  brand: objectId.optional(),
   minPrice: z.coerce.number().min(0).optional(),
   maxPrice: z.coerce.number().min(0).optional(),
   page: z.coerce.number().min(1).optional(),

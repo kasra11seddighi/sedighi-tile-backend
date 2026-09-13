@@ -8,8 +8,6 @@ import {
   deleteProject,
 } from "../controllers/project.controller";
 import { getProjectCategories } from "../controllers/projectCategory.controller";
-import { protect } from "../middlewares/auth.middleware";
-import { adminOnly } from "../middlewares/adminOnly.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import {
   createProjectSchema,
@@ -48,7 +46,7 @@ router.get("/", validate(getProjectsQuerySchema, "query"), getProjects);
  *       200: { description: لیست کامل پروژه‌ها }
  */
 // این مسیر هم باید قبل از "/categories" و "/:id" ثبت بشه.
-router.get("/all", protect, adminOnly, getAllProjectsAdmin);
+router.get("/all", getAllProjectsAdmin);
 
 /**
  * @swagger
@@ -91,7 +89,7 @@ router.get("/:id", getProject);
  *     responses:
  *       201: { description: ساخته شد }
  */
-router.post("/", protect, adminOnly, validate(createProjectSchema), createProject);
+router.post("/", validate(createProjectSchema), createProject);
 
 /**
  * @swagger
@@ -108,7 +106,7 @@ router.post("/", protect, adminOnly, validate(createProjectSchema), createProjec
  *     responses:
  *       200: { description: ویرایش شد }
  */
-router.put("/:id", protect, adminOnly, validate(updateProjectSchema), updateProject);
+router.put("/:id", validate(updateProjectSchema), updateProject);
 
 /**
  * @swagger
@@ -125,6 +123,6 @@ router.put("/:id", protect, adminOnly, validate(updateProjectSchema), updateProj
  *     responses:
  *       200: { description: حذف شد }
  */
-router.delete("/:id", protect, adminOnly, deleteProject);
+router.delete("/:id", deleteProject);
 
 export default router;

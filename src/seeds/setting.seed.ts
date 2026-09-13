@@ -11,8 +11,11 @@ async function createSetting(): Promise<void> {
 
     await Setting.create({
       logo: "نمایندگی صدیقی",
+      headerTitle: "فروشگاه تخصصی کاشی و سرامیک",
+      headerSubtitle: "صدیقی",
       menu: [
         { title: "محصولات", path: "/products" },
+        { title: "مجلات", path: "/magazine" },
         { title: "پروژه‌ها", path: "/projects" },
         { title: "درباره ما", path: "/about" },
         { title: "تماس", path: "/contact" },
@@ -23,6 +26,7 @@ async function createSetting(): Promise<void> {
       quickLinks: [
         { title: "خانه", path: "/" },
         { title: "محصولات", path: "/products" },
+        { title: "مجلات", path: "/magazine" },
         { title: "کاشی‌یاب هوشمند", path: "/#tile-finder" },
         { title: "شیرآلات", path: "/#shiralat" },
         { title: "سبد خرید", path: "/cart" },
@@ -44,6 +48,10 @@ async function createSetting(): Promise<void> {
         email: "info@sedighi-tile.ir",
         address: "تهران، خیابان نمونه، پلاک ۰",
       },
+      // فعلاً سبد خرید/چک‌اوت خاموشه؛ از داشبورد ادمین قابل روشن کردنه
+      cartEnabled: false,
+      // فعلاً بخش شیرآلات هم خاموشه؛ از داشبورد ادمین قابل روشن کردنه
+      shiralatEnabled: false,
     });
 
     console.log("✅ Setting created");

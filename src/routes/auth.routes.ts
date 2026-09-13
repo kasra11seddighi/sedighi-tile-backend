@@ -1,10 +1,27 @@
 import rateLimit from "express-rate-limit";
 import { Router } from "express";
-import { sendOtp, verifyOtp, getMe, getUsers } from "../controllers/auth.controller";
+import {
+  sendOtp,
+  verifyOtp,
+  logout,
+  getMe,
+  getUsers,
+  deleteUser,
+  updateProfile,
+  getAddresses,
+  addAddress,
+  updateAddress,
+  deleteAddress,
+} from "../controllers/auth.controller";
 import { protect } from "../middlewares/auth.middleware";
-import { adminOnly } from "../middlewares/adminOnly.middleware";
 import { validate } from "../middlewares/validate.middleware";
-import { sendOtpSchema, verifyOtpSchema } from "../validations/auth.validation";
+import {
+  sendOtpSchema,
+  verifyOtpSchema,
+  updateProfileSchema,
+  addressSchema,
+  updateAddressSchema,
+} from "../validations/auth.validation";
 
 const router = Router();
 
@@ -53,6 +70,17 @@ router.post("/verify-otp", validate(verifyOtpSchema), verifyOtp);
 
 /**
  * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     summary: خروج از حساب کاربری (پاک‌کردن کوکی توکن)
+ *     tags: [Auth]
+ *     responses:
+ *       200: { description: خروج موفق }
+ */
+router.post("/logout", logout);
+
+/**
+ * @swagger
  * /api/auth/me:
  *   get:
  *     summary: دریافت اطلاعات کاربر لاگین‌شده
@@ -66,6 +94,71 @@ router.get("/me", protect, getMe);
 
 /**
  * @swagger
+ * /api/auth/me:
+ *   patch:
+ *     summary: ویرایش پروفایل کاربر لاگین‌شده (فقط نام)
+ *     tags: [Auth]
+ *     security: [{ bearerAuth: [] }]
+ *     responses:
+ *       200: { description: پروفایل ویرایش شد }
+ */
+router.patch("/me", protect, validate(updateProfileSchema), updateProfile);
+
+/**
+ * @swagger
+ * /api/auth/me/addresses:
+ *   get:
+ *     summary: دریافت دفترچه آدرس کاربر لاگین‌شده
+ *     tags: [Auth]
+ *     security: [{ bearerAuth: [] }]
+ *     responses:
+ *       200: { description: لیست آدرس‌ها }
+ *   post:
+ *     summary: افزودن آدرس جدید به دفترچه آدرس
+ *     tags: [Auth]
+ *     security: [{ bearerAuth: [] }]
+ *     responses:
+ *       201: { description: آدرس اضافه شد }
+ */
+router.get("/me/addresses", protect, getAddresses);
+router.post("/me/addresses", protect, validate(addressSchema), addAddress);
+
+/**
+ * @swagger
+ * /api/auth/me/addresses/{addressId}:
+ *   put:
+ *     summary: ویرایش یک آدرس
+ *     tags: [Auth]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: addressId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200: { description: آدرس ویرایش شد }
+ *   delete:
+ *     summary: حذف یک آدرس
+ *     tags: [Auth]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: addressId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200: { description: آدرس حذف شد }
+ */
+router.put(
+  "/me/addresses/:addressId",
+  protect,
+  validate(updateAddressSchema),
+  updateAddress,
+);
+router.delete("/me/addresses/:addressId", protect, deleteAddress);
+
+/**
+ * @swagger
  * /api/auth/users:
  *   get:
  *     summary: دریافت لیست کاربران ثبت‌نامی (ادمین)
@@ -74,6 +167,20 @@ router.get("/me", protect, getMe);
  *     responses:
  *       200: { description: لیست کاربران }
  */
-router.get("/users", protect, adminOnly, getUsers);
+router.get("/users", getUsers);
+
+/**
+ * @swagger
+ * /api/auth/users/{id}:
+ *   delete:
+ *     summary: حذف یک کاربر (ادمین)
+ *     tags: [Auth]
+ *     security: [{ bearerAuth: [] }]
+ *     responses:
+ *       200: { description: کاربر حذف شد }
+ *       400: { description: تلاش برای حذف حساب خود ادمین }
+ *       404: { description: کاربر پیدا نشد }
+ */
+router.delete("/users/:id", deleteUser);
 
 export default router;

@@ -11,6 +11,7 @@ export const getAllProducts = async (query: GetProductsQuery) => {
   const {
     search,
     category,
+    brand,
     minPrice,
     maxPrice,
     page = 1,
@@ -28,6 +29,10 @@ export const getAllProducts = async (query: GetProductsQuery) => {
     filter.category = category;
   }
 
+  if (brand) {
+    filter.brand = brand;
+  }
+
   if (minPrice !== undefined || maxPrice !== undefined) {
     const priceFilter: { $gte?: number; $lte?: number } = {};
     if (minPrice !== undefined) priceFilter.$gte = minPrice;
@@ -39,7 +44,7 @@ export const getAllProducts = async (query: GetProductsQuery) => {
 
   const [products, total] = await Promise.all([
     Product.find(filter)
-      .populate("category", "name slug")
+      .populate("category", "name slug showPrice")
       .populate("brand", "name logo")
       .sort(sort)
       .skip(skip)
@@ -62,14 +67,14 @@ export const getAllProducts = async (query: GetProductsQuery) => {
 // پنل ادمین - همه محصولات (فعال و غیرفعال)، بدون صفحه‌بندی
 export const getAllProductsAdmin = async () => {
   return Product.find()
-    .populate("category", "name slug")
+    .populate("category", "name slug showPrice")
     .populate("brand", "name logo")
     .sort({ createdAt: -1 });
 };
 
 export const getProductById = async (id: string) => {
   const product = await Product.findById(id)
-    .populate("category", "name slug")
+    .populate("category", "name slug showPrice")
     .populate("brand", "name logo")
     .populate("locations", "name slug")
     .populate("sizes", "name slug")

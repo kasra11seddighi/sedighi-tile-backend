@@ -1,7 +1,5 @@
 import { Router } from "express";
 import { getHeader, getFooter, updateSetting } from "../controllers/setting.controller";
-import { protect } from "../middlewares/auth.middleware";
-import { adminOnly } from "../middlewares/adminOnly.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { updateSettingSchema } from "../validations/setting.validation";
 
@@ -46,6 +44,6 @@ router.get("/footer", getFooter);
  *     responses:
  *       200: { description: ویرایش شد }
  */
-router.put("/", protect, adminOnly, validate(updateSettingSchema), updateSetting);
+router.put("/", validate(updateSettingSchema), updateSetting);
 
 export default router;

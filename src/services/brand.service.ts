@@ -1,7 +1,10 @@
-import { Brand } from "../models/brand.model";
+import { Brand } from "../models/Brand.model";
 import { Product } from "../models/Product.model";
 import { ApiError } from "../utils/ApiError";
-import type { CreateBrandInput, UpdateBrandInput } from "../validations/brand.validation";
+import type {
+  CreateBrandInput,
+  UpdateBrandInput,
+} from "../validations/brand.validation";
 
 export const getActiveBrands = async () => {
   return Brand.find({ isActive: true })

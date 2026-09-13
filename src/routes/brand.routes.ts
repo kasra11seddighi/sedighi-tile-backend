@@ -6,8 +6,6 @@ import {
   updateBrand,
   deleteBrand,
 } from "../controllers/brand.controller";
-import { protect } from "../middlewares/auth.middleware";
-import { adminOnly } from "../middlewares/adminOnly.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { createBrandSchema, updateBrandSchema } from "../validations/brand.validation";
 
@@ -41,7 +39,7 @@ router.get("/", getBrands);
  *     responses:
  *       200: { description: لیست کامل برندها }
  */
-router.get("/all", protect, adminOnly, getAllBrands);
+router.get("/all", getAllBrands);
 
 /**
  * @swagger
@@ -53,7 +51,7 @@ router.get("/all", protect, adminOnly, getAllBrands);
  *     responses:
  *       201: { description: ساخته شد }
  */
-router.post("/", protect, adminOnly, validate(createBrandSchema), createBrand);
+router.post("/", validate(createBrandSchema), createBrand);
 
 /**
  * @swagger
@@ -70,7 +68,7 @@ router.post("/", protect, adminOnly, validate(createBrandSchema), createBrand);
  *     responses:
  *       200: { description: ویرایش شد }
  */
-router.put("/:id", protect, adminOnly, validate(updateBrandSchema), updateBrand);
+router.put("/:id", validate(updateBrandSchema), updateBrand);
 
 /**
  * @swagger
@@ -87,6 +85,6 @@ router.put("/:id", protect, adminOnly, validate(updateBrandSchema), updateBrand)
  *     responses:
  *       200: { description: حذف شد }
  */
-router.delete("/:id", protect, adminOnly, deleteBrand);
+router.delete("/:id", deleteBrand);
 
 export default router;

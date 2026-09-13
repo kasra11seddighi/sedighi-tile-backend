@@ -6,8 +6,6 @@ import {
   updateCategory,
   deleteCategory,
 } from "../controllers/category.controller";
-import { protect } from "../middlewares/auth.middleware";
-import { adminOnly } from "../middlewares/adminOnly.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { createCategorySchema, updateCategorySchema } from "../validations/category.validation";
 
@@ -58,7 +56,7 @@ router.get("/:id", getCategory);
  *     responses:
  *       201: { description: ساخته شد }
  */
-router.post("/", protect, adminOnly, validate(createCategorySchema), createCategory);
+router.post("/", validate(createCategorySchema), createCategory);
 
 /**
  * @swagger
@@ -75,7 +73,7 @@ router.post("/", protect, adminOnly, validate(createCategorySchema), createCateg
  *     responses:
  *       200: { description: ویرایش شد }
  */
-router.put("/:id", protect, adminOnly, validate(updateCategorySchema), updateCategory);
+router.put("/:id", validate(updateCategorySchema), updateCategory);
 
 /**
  * @swagger
@@ -92,6 +90,6 @@ router.put("/:id", protect, adminOnly, validate(updateCategorySchema), updateCat
  *     responses:
  *       200: { description: حذف شد }
  */
-router.delete("/:id", protect, adminOnly, deleteCategory);
+router.delete("/:id", deleteCategory);
 
 export default router;

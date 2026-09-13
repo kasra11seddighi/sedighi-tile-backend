@@ -1,7 +1,6 @@
 import { Router } from "express";
 import * as ctrl from "../controllers/tileFinderOption.controller";
-import { protect } from "../middlewares/auth.middleware";
-import { adminOnly } from "../middlewares/adminOnly.middleware";
+import * as customCtrl from "../controllers/tileFinderCustomOption.controller";
 import { validate } from "../middlewares/validate.middleware";
 import {
   createOptionSchema,
@@ -9,6 +8,10 @@ import {
   createColorOptionSchema,
   updateColorOptionSchema,
 } from "../validations/tileFinderOption.validation";
+import {
+  createCustomOptionSchema,
+  updateCustomOptionSchema,
+} from "../validations/tileFinderCustomOption.validation";
 
 const router = Router();
 
@@ -17,58 +20,85 @@ const router = Router();
  * tags:
  *   name: TileFinderOptions
  *   description: مدیریت گزینه‌های کاشی‌یاب (فضا، سایز، سبک، رنگ) - ادمین
- *
- * توجه: این مسیرها برای مدیریت گزینه‌ها از پنل ادمین هستند.
- * لیست عمومی همین گزینه‌ها (برای ویزارد کاشی‌یاب) همچنان از /tile-finder/* می‌آید
- * و دست‌نخورده باقی مانده تا فرانت فعلی نشکند.
  */
 
+// توجه: این مسیرها برای مدیریت گزینه‌ها از پنل ادمین هستند.
+// لیست عمومی همین گزینه‌ها (برای ویزارد کاشی‌یاب) همچنان از /tile-finder/* می‌آید
+// و دست‌نخورده باقی مانده تا فرانت فعلی نشکند.
+
 // ---------- Location ----------
-router.get("/locations", protect, adminOnly, ctrl.getLocations);
+router.get("/locations", ctrl.getLocations);
 router.post(
   "/locations",
-  protect,
-  adminOnly,
   validate(createOptionSchema),
   ctrl.createLocation,
 );
 router.put(
   "/locations/:id",
-  protect,
-  adminOnly,
   validate(updateOptionSchema),
   ctrl.updateLocation,
 );
-router.delete("/locations/:id", protect, adminOnly, ctrl.deleteLocation);
+router.delete("/locations/:id", ctrl.deleteLocation);
 
 // ---------- Size ----------
-router.get("/sizes", protect, adminOnly, ctrl.getSizes);
-router.post("/sizes", protect, adminOnly, validate(createOptionSchema), ctrl.createSize);
-router.put("/sizes/:id", protect, adminOnly, validate(updateOptionSchema), ctrl.updateSize);
-router.delete("/sizes/:id", protect, adminOnly, ctrl.deleteSize);
+router.get("/sizes", ctrl.getSizes);
+router.post(
+  "/sizes",
+  validate(createOptionSchema),
+  ctrl.createSize,
+);
+router.put(
+  "/sizes/:id",
+  validate(updateOptionSchema),
+  ctrl.updateSize,
+);
+router.delete("/sizes/:id", ctrl.deleteSize);
 
 // ---------- Style ----------
-router.get("/styles", protect, adminOnly, ctrl.getStyles);
-router.post("/styles", protect, adminOnly, validate(createOptionSchema), ctrl.createStyle);
-router.put("/styles/:id", protect, adminOnly, validate(updateOptionSchema), ctrl.updateStyle);
-router.delete("/styles/:id", protect, adminOnly, ctrl.deleteStyle);
+router.get("/styles", ctrl.getStyles);
+router.post(
+  "/styles",
+  validate(createOptionSchema),
+  ctrl.createStyle,
+);
+router.put(
+  "/styles/:id",
+  validate(updateOptionSchema),
+  ctrl.updateStyle,
+);
+router.delete("/styles/:id", ctrl.deleteStyle);
 
 // ---------- Color ----------
-router.get("/colors", protect, adminOnly, ctrl.getColors);
+router.get("/colors", ctrl.getColors);
 router.post(
   "/colors",
-  protect,
-  adminOnly,
   validate(createColorOptionSchema),
   ctrl.createColor,
 );
 router.put(
   "/colors/:id",
-  protect,
-  adminOnly,
   validate(updateColorOptionSchema),
   ctrl.updateColor,
 );
-router.delete("/colors/:id", protect, adminOnly, ctrl.deleteColor);
+router.delete("/colors/:id", ctrl.deleteColor);
+
+// ---------- Custom (گزینه‌های مراحل سفارشی) ----------
+// این مسیرها برای مراحلی هستن که ادمین خودش از پنل ساخته (source: "custom")
+// و برخلاف ۴ نوع بالا، به هیچ مدل از پیش تعریف‌شده‌ای وصل نیستن.
+router.get("/custom/:stepId", customCtrl.getCustomOptions);
+router.post(
+  "/custom/:stepId",
+  validate(createCustomOptionSchema),
+  customCtrl.createCustomOption,
+);
+router.put(
+  "/custom/:stepId/:id",
+  validate(updateCustomOptionSchema),
+  customCtrl.updateCustomOption,
+);
+router.delete(
+  "/custom/:stepId/:id",
+  customCtrl.deleteCustomOption,
+);
 
 export default router;

@@ -9,6 +9,8 @@ export interface IComment extends Document {
   text: string;
   rating?: number;
   isApproved: boolean;
+  adminReply?: string;
+  repliedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -32,6 +34,10 @@ const commentSchema = new Schema<IComment>(
 
     // نظرات تا وقتی ادمین تاییدشون نکنه توی سایت عمومی نمایش داده نمی‌شن
     isApproved: { type: Boolean, default: false },
+
+    // پاسخ ادمین به نظر کاربر
+    adminReply: { type: String, trim: true, default: "" },
+    repliedAt: { type: Date },
   },
   { timestamps: true },
 );
