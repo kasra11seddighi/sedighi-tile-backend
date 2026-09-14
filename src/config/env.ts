@@ -67,6 +67,29 @@ const envSchema = z.object({
     .enum(["true", "false"])
     .default("true")
     .transform((value) => value === "true"),
+
+  // ذخیره‌سازی ابری لیارا (Object Storage سازگار با S3) - برای آپلود
+  // عکس‌های پنل ادمین. چون فایل‌سیستم سرور Abasthan پایدار نیست، عکس‌ها
+  // دیگه روی دیسک محلی سیو نمی‌شن.
+  LIARA_ENDPOINT: z
+    .string()
+    .trim()
+    .min(1, "LIARA_ENDPOINT الزامی است"),
+
+  LIARA_ACCESS_KEY: z
+    .string()
+    .trim()
+    .min(1, "LIARA_ACCESS_KEY الزامی است"),
+
+  LIARA_SECRET_KEY: z
+    .string()
+    .trim()
+    .min(1, "LIARA_SECRET_KEY الزامی است"),
+
+  LIARA_BUCKET_NAME: z
+    .string()
+    .trim()
+    .min(1, "LIARA_BUCKET_NAME الزامی است"),
 });
 
 const parsed = envSchema.safeParse(process.env);

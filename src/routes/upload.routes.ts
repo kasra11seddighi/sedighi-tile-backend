@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { uploadImage } from "../controllers/upload.controller";
 import { uploadAdminImage } from "../middlewares/adminUpload.middleware";
-import { cleanupOrphanedUpload } from "../middlewares/upload.middleware";
 
 const router = Router();
 
@@ -39,7 +38,6 @@ const router = Router();
 router.post(
   "/:folder",
   uploadAdminImage.single("image"),
-  cleanupOrphanedUpload,
   uploadImage,
 );
 
