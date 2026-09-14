@@ -7,6 +7,7 @@ import helmet from "helmet";
 import mongoSanitize from "express-mongo-sanitize";
 import rateLimit from "express-rate-limit";
 import compression from "compression";
+import path from "path";
 
 import { env } from "./config/env";
 import { swaggerSpec } from "./config/swagger";
@@ -141,14 +142,11 @@ export const createApp = (): Express => {
   /*
    * فایل‌های استاتیک داخل پوشه public
    *
-   * Helmet به‌صورت پیش‌فرض هدر زیر را تنظیم می‌کند:
-   * Cross-Origin-Resource-Policy: same-origin
-   *
-   * چون فرانت‌اند و بک‌اند روی originهای متفاوتی اجرا می‌شوند،
-   * برای فایل‌های عمومی این هدر را به cross-origin تغییر می‌دهیم.
+   * استفاده از path.join(process.cwd(), "public") جهت اطمینان از صحت مسیر
+   * در محیط Production پس از کامپایل TypeScript به dist.
    */
   app.use(
-    express.static("public", {
+    express.static(path.join(process.cwd(), "public"), {
       setHeaders: (res) => {
         res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
       },
