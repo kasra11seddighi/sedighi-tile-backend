@@ -2,7 +2,7 @@ import { Router } from "express";
 import * as roomVisualizerController from "../controllers/roomVisualizer.controller";
 import { validate } from "../middlewares/validate.middleware";
 import { applyTileSchema } from "../validations/roomVisualizer.validation";
-import { uploadRoomImage, cleanupOrphanedUpload } from "../middlewares/upload.middleware";
+import { uploadRoomImage } from "../middlewares/upload.middleware";
 import { protect } from "../middlewares/auth.middleware";
 import { roomVisualizerRateLimit } from "../middlewares/rateLimit.middleware";
 
@@ -61,7 +61,6 @@ router.post(
   roomVisualizerRateLimit,
   uploadRoomImage.single("image"),
   validate(applyTileSchema),
-  cleanupOrphanedUpload, // اگه validate بالا خطا بده، فایل آپلودشده رو پاک می‌کنه
   roomVisualizerController.applyTile,
 );
 

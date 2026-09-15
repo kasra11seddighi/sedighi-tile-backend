@@ -4,6 +4,8 @@ import {
   getMessages,
   markAsRead,
 } from "../controllers/contactMessage.controller";
+import { protect } from "../middlewares/auth.middleware";
+import { adminOnly } from "../middlewares/adminOnly.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { publicFormRateLimit } from "../middlewares/rateLimit.middleware";
 import { createContactMessageSchema } from "../validations/contactMessage.validation";
@@ -28,6 +30,9 @@ const router = Router();
  *       400: { description: ورودی نامعتبر }
  */
 router.post("/", publicFormRateLimit, validate(createContactMessageSchema), createMessage);
+
+// از این‌جا به بعد فقط ادمین
+router.use(protect, adminOnly);
 
 /**
  * @swagger

@@ -1,4 +1,6 @@
 import { Router } from "express";
+import { protect } from "../middlewares/auth.middleware";
+import { adminOnly } from "../middlewares/adminOnly.middleware";
 import * as ctrl from "../controllers/tileFinderStep.controller";
 import { validate } from "../middlewares/validate.middleware";
 import {
@@ -12,6 +14,9 @@ const router = Router();
 router.get("/", ctrl.getActiveSteps);
 
 // ادمین
+// از این‌جا به بعد فقط ادمین (نیازمند لاگین و نقش admin)
+router.use(protect, adminOnly);
+
 router.get("/all", ctrl.getAllSteps);
 router.post("/", validate(createTileFinderStepSchema), ctrl.createStep);
 router.put("/:id", validate(updateTileFinderStepSchema), ctrl.updateStep);

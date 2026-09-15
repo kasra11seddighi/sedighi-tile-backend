@@ -8,6 +8,8 @@ import {
   deleteProject,
 } from "../controllers/project.controller";
 import { getProjectCategories } from "../controllers/projectCategory.controller";
+import { protect } from "../middlewares/auth.middleware";
+import { adminOnly } from "../middlewares/adminOnly.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import {
   createProjectSchema,
@@ -46,7 +48,7 @@ router.get("/", validate(getProjectsQuerySchema, "query"), getProjects);
  *       200: { description: لیست کامل پروژه‌ها }
  */
 // این مسیر هم باید قبل از "/categories" و "/:id" ثبت بشه.
-router.get("/all", getAllProjectsAdmin);
+router.get("/all", protect, adminOnly, getAllProjectsAdmin);
 
 /**
  * @swagger
@@ -78,6 +80,9 @@ router.get("/categories", getProjectCategories);
  *       404: { description: یافت نشد }
  */
 router.get("/:id", getProject);
+
+// از این‌جا به بعد فقط ادمین
+router.use(protect, adminOnly);
 
 /**
  * @swagger

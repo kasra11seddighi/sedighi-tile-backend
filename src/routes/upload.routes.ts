@@ -1,8 +1,12 @@
 import { Router } from "express";
 import { uploadImage } from "../controllers/upload.controller";
 import { uploadAdminImage } from "../middlewares/adminUpload.middleware";
+import { protect } from "../middlewares/auth.middleware";
+import { adminOnly } from "../middlewares/adminOnly.middleware";
 
 const router = Router();
+
+router.use(protect, adminOnly);
 
 /**
  * @swagger

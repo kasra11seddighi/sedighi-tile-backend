@@ -6,6 +6,8 @@ import {
   updateProjectCategory,
   deleteProjectCategory,
 } from "../controllers/projectCategory.controller";
+import { protect } from "../middlewares/auth.middleware";
+import { adminOnly } from "../middlewares/adminOnly.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import {
   createProjectCategorySchema,
@@ -28,6 +30,9 @@ const router = Router();
 router.get("/", getProjectCategories);
 
 router.get("/:id", getProjectCategory);
+
+// از این‌جا به بعد فقط ادمین
+router.use(protect, adminOnly);
 
 router.post(
   "/",

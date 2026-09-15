@@ -7,6 +7,8 @@ import {
   replyToComment,
   deleteComment,
 } from "../controllers/comment.controller";
+import { protect } from "../middlewares/auth.middleware";
+import { adminOnly } from "../middlewares/adminOnly.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { publicFormRateLimit } from "../middlewares/rateLimit.middleware";
 import {
@@ -68,6 +70,9 @@ router.post(
  *       200: { description: لیست نظرات تاییدشده }
  */
 router.get("/product/:productId", getCommentsByProduct);
+
+// از این‌جا به بعد فقط ادمین
+router.use(protect, adminOnly);
 
 /**
  * @swagger

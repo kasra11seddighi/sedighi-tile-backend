@@ -1,4 +1,6 @@
 import { Router } from "express";
+import { protect } from "../middlewares/auth.middleware";
+import { adminOnly } from "../middlewares/adminOnly.middleware";
 import {
   getPublicTestimonials,
   getAllTestimonials,
@@ -49,6 +51,9 @@ router.get("/", validate(getTestimonialsQuerySchema, "query"), getPublicTestimon
  */
 // این مسیر باید قبل از "/:id" ثبت بشه — دقیقاً همون نکته‌ای که توی
 // project.routes.ts برای "/all" و "/categories" رعایت شده.
+// از این‌جا به بعد فقط ادمین (نیازمند لاگین و نقش admin)
+router.use(protect, adminOnly);
+
 router.get("/all", getAllTestimonials);
 
 /**

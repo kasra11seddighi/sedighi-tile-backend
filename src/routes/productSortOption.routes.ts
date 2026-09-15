@@ -1,5 +1,7 @@
 import { Router } from "express";
 import * as ctrl from "../controllers/productSortOption.controller";
+import { protect } from "../middlewares/auth.middleware";
+import { adminOnly } from "../middlewares/adminOnly.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import {
   createSortOptionSchema,
@@ -7,6 +9,9 @@ import {
 } from "../validations/productSortOption.validation";
 
 const router = Router();
+
+// کل این روتر مخصوص پنل ادمینه
+router.use(protect, adminOnly);
 
 /**
  * @swagger

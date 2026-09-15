@@ -1,42 +1,58 @@
-import fs from "fs";
-import path from "path";
+import { ListObjectsV2Command, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { liaraS3, LIARA_BUCKET_NAME } from "../config/liaraStorage";
 
 /**
- * عکس‌های خامِ اتاق (uploads/rooms) بلافاصله بعد از پردازش هر درخواست
- * پاک می‌شن (در roomVisualizer.controller.ts). اما عکس‌های نتیجه‌ی نهایی
- * (uploads/results) عمداً نگه داشته می‌شن چون کاربر باید بتونه بعد از
- * دریافت پاسخ، لینکش رو باز/دانلود کنه؛ در نتیجه این پوشه با گذشت زمان
- * بزرگ می‌شه.
+ * عکس خامِ اتاق دیگه اصلاً جایی ذخیره نمی‌شه (multer با memoryStorage
+ * فقط توی حافظه‌ی همون درخواست نگه‌ش می‌داره و با پاسخ گرفتن از AI از
+ * بین می‌ره). عکس‌های نتیجه‌ی نهایی هم دیگه روی دیسک سرور نیستن؛ روی
+ * Liara Object Storage (پیشوند room-visualizer-results/) ذخیره می‌شن،
+ * چون فایل‌سیستم اپ روی لیارا ephemeral هست.
  *
- * این اسکریپت فایل‌های قدیمی‌تر از MAX_AGE_DAYS رو از uploads/results
- * پاک می‌کنه. پیشنهاد می‌شه با یک cron job روزانه اجرا بشه، مثلاً:
+ * این اسکریپت آبجکت‌های قدیمی‌تر از MAX_AGE_DAYS رو از همون پیشوند تو
+ * باکت پاک می‌کنه. پیشنهاد می‌شه با یک cron job روزانه اجرا بشه، مثلاً:
  *   0 3 * * * cd /path/to/backend && npm run cleanup:uploads
  */
 
-const RESULTS_DIR = path.join(process.cwd(), "public", "uploads", "results");
+const RESULTS_PREFIX = "room-visualizer-results/";
 const MAX_AGE_DAYS = 7;
 
-const run = (): void => {
-  if (!fs.existsSync(RESULTS_DIR)) {
-    console.log("پوشه‌ی uploads/results وجود نداره؛ کاری برای پاک‌سازی نیست.");
-    return;
-  }
-
+const run = async (): Promise<void> => {
   const maxAgeMs = MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
   const now = Date.now();
-  const files = fs.readdirSync(RESULTS_DIR);
 
   let deleted = 0;
-  for (const file of files) {
-    const filePath = path.join(RESULTS_DIR, file);
-    const stats = fs.statSync(filePath);
-    if (now - stats.mtimeMs > maxAgeMs) {
-      fs.unlinkSync(filePath);
+  let continuationToken: string | undefined;
+
+  do {
+    const listResult = await liaraS3.send(
+      new ListObjectsV2Command({
+        Bucket: LIARA_BUCKET_NAME,
+        Prefix: RESULTS_PREFIX,
+        ContinuationToken: continuationToken,
+      }),
+    );
+
+    const oldObjects = (listResult.Contents ?? []).filter(
+      (obj) => obj.Key && obj.LastModified && now - obj.LastModified.getTime() > maxAgeMs,
+    );
+
+    for (const obj of oldObjects) {
+      await liaraS3.send(
+        new DeleteObjectCommand({
+          Bucket: LIARA_BUCKET_NAME,
+          Key: obj.Key,
+        }),
+      );
       deleted += 1;
     }
-  }
+
+    continuationToken = listResult.IsTruncated ? listResult.NextContinuationToken : undefined;
+  } while (continuationToken);
 
   console.log(`✅ پاک‌سازی انجام شد. ${deleted} فایل قدیمی‌تر از ${MAX_AGE_DAYS} روز حذف شد.`);
 };
 
-run();
+run().catch((err) => {
+  console.error("خطا در پاک‌سازی نتایج قدیمی:", err);
+  process.exitCode = 1;
+});

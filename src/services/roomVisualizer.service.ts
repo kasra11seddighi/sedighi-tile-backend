@@ -1,14 +1,10 @@
-import fs from "fs";
-import path from "path";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { Product } from "../models/Product.model";
 import { ApiError } from "../utils/ApiError";
 import { generateRoomWithTile } from "../utils/aiImageProvider";
+import { liaraS3, LIARA_BUCKET_NAME, buildPublicUrl } from "../config/liaraStorage";
 
-const RESULTS_DIR = path.join(process.cwd(), "public", "uploads", "results");
-
-if (!fs.existsSync(RESULTS_DIR)) {
-  fs.mkdirSync(RESULTS_DIR, { recursive: true });
-}
+const RESULTS_PREFIX = "room-visualizer-results";
 
 // ===============================
 // SUGGEST TILE
@@ -53,7 +49,11 @@ export const suggestTile = async () => {
 // اعمال بافت کاشی انتخابی روی عکس اتاق کاربر با هوش مصنوعی
 // ===============================
 
-export const applyTileToRoom = async (roomImagePath: string, tileId: string) => {
+export const applyTileToRoom = async (
+  roomImageBuffer: Buffer,
+  roomImageMimeType: string,
+  tileId: string,
+) => {
   const product = await Product.findOne({ _id: tileId, isActive: true })
     .select("name images")
     .lean();
@@ -67,14 +67,26 @@ export const applyTileToRoom = async (roomImagePath: string, tileId: string) => 
   const prompt = `دیوار و کف این اتاق را با بافت کاشی «${product.name}» به‌صورت واقع‌گرایانه بازسازی کن؛ چیدمان، وسایل و نورپردازی اتاق باید بدون تغییر باقی بماند.`;
 
   const resultBuffer = await generateRoomWithTile({
-    roomImagePath,
+    roomImageBuffer,
+    roomImageMimeType,
     tileImageUrl,
     prompt,
   });
 
-  const fileName = `result-${Date.now()}-${Math.round(Math.random() * 1e9)}.jpg`;
-  const filePath = path.join(RESULTS_DIR, fileName);
-  fs.writeFileSync(filePath, resultBuffer);
+  // نتیجه‌ی نهایی هم مثل آپلودهای ادمین روی Liara Object Storage ذخیره
+  // می‌شه، نه دیسک محلی سرور - چون فایل‌سیستم اپ روی لیارا ephemeral
+  // هست و با هر ری‌دیپلوی/ری‌استارت پاک می‌شه و لینک نتیجه ۴۰۴ می‌شد.
+  const key = `${RESULTS_PREFIX}/result-${Date.now()}-${Math.round(Math.random() * 1e9)}.jpg`;
 
-  return { resultImage: `/uploads/results/${fileName}` };
+  await liaraS3.send(
+    new PutObjectCommand({
+      Bucket: LIARA_BUCKET_NAME,
+      Key: key,
+      Body: resultBuffer,
+      ContentType: "image/jpeg",
+      ACL: "public-read",
+    }),
+  );
+
+  return { resultImage: buildPublicUrl(key) };
 };

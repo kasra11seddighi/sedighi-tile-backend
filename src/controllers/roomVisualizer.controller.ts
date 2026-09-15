@@ -1,4 +1,3 @@
-import fs from "fs";
 import { asyncHandler } from "../utils/asyncHandler";
 import { ApiError } from "../utils/ApiError";
 import * as roomVisualizerService from "../services/roomVisualizer.service";
@@ -15,15 +14,13 @@ export const applyTile = asyncHandler(async (req, res) => {
 
   const { tileId } = req.body as { tileId: string };
 
-  try {
-    const data = await roomVisualizerService.applyTileToRoom(req.file.path, tileId);
-    res.status(200).json(data);
-  } finally {
-    // عکس خامِ اتاق بعد از استفاده (چه موفق چه ناموفق) دیگه لازم نیست؛
-    // پاکش می‌کنیم تا دیسک server پر نشه. نتیجه‌ی نهایی جداگانه توی
-    // uploads/results ذخیره می‌مونه.
-    fs.unlink(req.file.path, (err) => {
-      if (err) console.error("خطا در حذف فایل موقت عکس اتاق:", err.message);
-    });
-  }
+  // عکس اتاق دیگه هیچ‌وقت روی دیسک سرور نمی‌شینه (multer با
+  // memoryStorage اون رو به‌صورت buffer نگه می‌داره)، پس نیازی به
+  // پاک‌سازی فایل موقت هم نیست.
+  const data = await roomVisualizerService.applyTileToRoom(
+    req.file.buffer,
+    req.file.mimetype,
+    tileId,
+  );
+  res.status(200).json(data);
 });

@@ -1,4 +1,6 @@
 import { Router } from "express";
+import { protect } from "../middlewares/auth.middleware";
+import { adminOnly } from "../middlewares/adminOnly.middleware";
 import {
   getBrands,
   getAllBrands,
@@ -39,6 +41,9 @@ router.get("/", getBrands);
  *     responses:
  *       200: { description: لیست کامل برندها }
  */
+// از این‌جا به بعد فقط ادمین (نیازمند لاگین و نقش admin)
+router.use(protect, adminOnly);
+
 router.get("/all", getAllBrands);
 
 /**

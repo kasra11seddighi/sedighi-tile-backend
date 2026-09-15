@@ -1,12 +1,13 @@
-import fs from "fs";
 import axios from "axios";
 import FormData from "form-data";
 import { env } from "../config/env";
 import { ApiError } from "./ApiError";
 
 interface GenerateRoomImageOptions {
-  /** مسیر فایل عکس اتاق روی دیسک (خروجی multer) */
-  roomImagePath: string;
+  /** بافر عکس اتاق (خروجی multer memoryStorage) */
+  roomImageBuffer: Buffer;
+  /** mimetype عکس اتاق، برای فرم‌دیتای ارسالی به سرویس هوش مصنوعی */
+  roomImageMimeType: string;
   /** آدرس عکس بافت/نمونه کاشی انتخابی (اختیاری) */
   tileImageUrl?: string;
   /** توضیح متنی برای مدل هوش مصنوعی */
@@ -27,7 +28,8 @@ interface GenerateRoomImageOptions {
  *   AI_API_KEY=کلید API
  */
 export const generateRoomWithTile = async ({
-  roomImagePath,
+  roomImageBuffer,
+  roomImageMimeType,
   tileImageUrl,
   prompt,
 }: GenerateRoomImageOptions): Promise<Buffer> => {
@@ -39,7 +41,10 @@ export const generateRoomWithTile = async ({
   }
 
   const form = new FormData();
-  form.append("image", fs.createReadStream(roomImagePath));
+  form.append("image", roomImageBuffer, {
+    filename: `room.${roomImageMimeType === "image/png" ? "png" : "jpg"}`,
+    contentType: roomImageMimeType,
+  });
   form.append("prompt", prompt);
   if (tileImageUrl) {
     form.append("reference_image_url", tileImageUrl);

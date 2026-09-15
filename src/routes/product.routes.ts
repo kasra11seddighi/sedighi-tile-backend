@@ -8,6 +8,8 @@ import {
   deleteProduct,
 } from "../controllers/product.controller";
 import { getSortOptions } from "../controllers/productSortOption.controller";
+import { protect } from "../middlewares/auth.middleware";
+import { adminOnly } from "../middlewares/adminOnly.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import {
   createProductSchema,
@@ -59,7 +61,7 @@ router.get("/sort-options", getSortOptions);
  *       200: { description: لیست کامل محصولات }
  */
 // این مسیر هم باید قبل از "/:id" ثبت بشه، عیناً به همون دلیل sort-options.
-router.get("/all", getAllProductsAdmin);
+router.get("/all", protect, adminOnly, getAllProductsAdmin);
 
 /**
  * @swagger
@@ -77,6 +79,9 @@ router.get("/all", getAllProductsAdmin);
  *       404: { description: یافت نشد }
  */
 router.get("/:id", getProduct);
+
+// از این‌جا به بعد فقط ادمین
+router.use(protect, adminOnly);
 
 /**
  * @swagger

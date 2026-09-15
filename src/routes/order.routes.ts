@@ -10,15 +10,22 @@ import {
   cancelMyOrder,
 } from "../controllers/order.controller";
 import { protect } from "../middlewares/auth.middleware";
+import { adminOnly } from "../middlewares/adminOnly.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { createOrderSchema, updateOrderStatusSchema } from "../validations/order.validation";
 
 const router = Router();
 
-// روت‌های پنل ادمین: عمداً بدون protect/adminOnly (قبل از router.use(protect)
-// تعریف شدن) چون تصمیم گرفته شده پنل ادمین لاگین نداشته باشه.
-router.get("/admin/all", getAllOrders);
-router.put("/:id/status", validate(updateOrderStatusSchema), updateOrderStatus);
+// روت‌های پنل ادمین: قبلاً عمداً بدون protect/adminOnly بودن، اما چون
+// قراره سرور پابلیک بشه الان پشت لاگین ادمین گذاشته شدن.
+router.get("/admin/all", protect, adminOnly, getAllOrders);
+router.put(
+  "/:id/status",
+  protect,
+  adminOnly,
+  validate(updateOrderStatusSchema),
+  updateOrderStatus,
+);
 
 // از این‌جا به بعد فقط برای مشتری‌های سایت اصلیه؛ سفارش‌های خودشون رو
 // می‌بینن/می‌سازن، پس همچنان نیاز به لاگین دارن.

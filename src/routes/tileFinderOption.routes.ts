@@ -1,6 +1,8 @@
 import { Router } from "express";
 import * as ctrl from "../controllers/tileFinderOption.controller";
 import * as customCtrl from "../controllers/tileFinderCustomOption.controller";
+import { protect } from "../middlewares/auth.middleware";
+import { adminOnly } from "../middlewares/adminOnly.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import {
   createOptionSchema,
@@ -25,6 +27,9 @@ const router = Router();
 // توجه: این مسیرها برای مدیریت گزینه‌ها از پنل ادمین هستند.
 // لیست عمومی همین گزینه‌ها (برای ویزارد کاشی‌یاب) همچنان از /tile-finder/* می‌آید
 // و دست‌نخورده باقی مانده تا فرانت فعلی نشکند.
+
+// کل این روتر مخصوص پنل ادمینه
+router.use(protect, adminOnly);
 
 // ---------- Location ----------
 router.get("/locations", ctrl.getLocations);

@@ -1,4 +1,6 @@
 import { Router } from "express";
+import { protect } from "../middlewares/auth.middleware";
+import { adminOnly } from "../middlewares/adminOnly.middleware";
 import { getHeader, getFooter, updateSetting } from "../controllers/setting.controller";
 import { validate } from "../middlewares/validate.middleware";
 import { updateSettingSchema } from "../validations/setting.validation";
@@ -44,6 +46,9 @@ router.get("/footer", getFooter);
  *     responses:
  *       200: { description: ویرایش شد }
  */
+// از این‌جا به بعد فقط ادمین (نیازمند لاگین و نقش admin)
+router.use(protect, adminOnly);
+
 router.put("/", validate(updateSettingSchema), updateSetting);
 
 export default router;

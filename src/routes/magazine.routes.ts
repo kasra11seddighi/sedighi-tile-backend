@@ -7,6 +7,8 @@ import {
   updateMagazine,
   deleteMagazine,
 } from "../controllers/magazine.controller";
+import { protect } from "../middlewares/auth.middleware";
+import { adminOnly } from "../middlewares/adminOnly.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import {
   createMagazineSchema,
@@ -43,7 +45,7 @@ router.get("/", getMagazines);
  *     responses:
  *       200: { description: لیست کامل مقاله‌ها }
  */
-router.get("/all", getAllMagazines);
+router.get("/all", protect, adminOnly, getAllMagazines);
 
 /**
  * @swagger
@@ -61,6 +63,9 @@ router.get("/all", getAllMagazines);
  *       404: { description: یافت نشد }
  */
 router.get("/:slug", getMagazineBySlug);
+
+// از این‌جا به بعد فقط ادمین
+router.use(protect, adminOnly);
 
 /**
  * @swagger

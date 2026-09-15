@@ -12,6 +12,10 @@ export const getAllProducts = async (query: GetProductsQuery) => {
     search,
     category,
     brand,
+    size,
+    style,
+    color,
+    location,
     minPrice,
     maxPrice,
     page = 1,
@@ -31,6 +35,24 @@ export const getAllProducts = async (query: GetProductsQuery) => {
 
   if (brand) {
     filter.brand = brand;
+  }
+
+  // sizes/styles/colors/locations روی محصول آرایه‌ان؛ پاس دادن یک id
+  // تکی به موتور Mongo خودکار یعنی «آرایه شامل این id باشه»
+  if (size) {
+    filter.sizes = size;
+  }
+
+  if (style) {
+    filter.styles = style;
+  }
+
+  if (color) {
+    filter.colors = color;
+  }
+
+  if (location) {
+    filter.locations = location;
   }
 
   if (minPrice !== undefined || maxPrice !== undefined) {

@@ -131,6 +131,12 @@ export const getProductsQuerySchema = z.object({
   search: z.string().trim().optional(),
   category: objectId.optional(),
   brand: objectId.optional(),
+  // فیلترهای مبتنی بر همون رفرنس‌هایی که فایندر کاشی هم استفاده می‌کنه
+  // (TileFinderSize/Style/Color/Location) - هر کدوم یک id تکی برای فیلتر
+  size: objectId.optional(),
+  style: objectId.optional(),
+  color: objectId.optional(),
+  location: objectId.optional(),
   minPrice: z.coerce.number().min(0).optional(),
   maxPrice: z.coerce.number().min(0).optional(),
   page: z.coerce.number().min(1).optional(),

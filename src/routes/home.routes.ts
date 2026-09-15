@@ -1,4 +1,6 @@
 import { Router } from "express";
+import { protect } from "../middlewares/auth.middleware";
+import { adminOnly } from "../middlewares/adminOnly.middleware";
 import { getHome, updateHome } from "../controllers/home.controller";
 import { validate } from "../middlewares/validate.middleware";
 import { updateHomeSchema } from "../validations/home.validation";
@@ -34,6 +36,9 @@ router.get("/", getHome);
  *     responses:
  *       200: { description: ویرایش شد }
  */
+// از این‌جا به بعد فقط ادمین (نیازمند لاگین و نقش admin)
+router.use(protect, adminOnly);
+
 router.put("/", validate(updateHomeSchema), updateHome);
 
 export default router;

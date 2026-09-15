@@ -14,6 +14,7 @@ import {
   deleteAddress,
 } from "../controllers/auth.controller";
 import { protect } from "../middlewares/auth.middleware";
+import { adminOnly } from "../middlewares/adminOnly.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import {
   sendOtpSchema,
@@ -167,7 +168,7 @@ router.delete("/me/addresses/:addressId", protect, deleteAddress);
  *     responses:
  *       200: { description: لیست کاربران }
  */
-router.get("/users", getUsers);
+router.get("/users", protect, adminOnly, getUsers);
 
 /**
  * @swagger
@@ -181,6 +182,6 @@ router.get("/users", getUsers);
  *       400: { description: تلاش برای حذف حساب خود ادمین }
  *       404: { description: کاربر پیدا نشد }
  */
-router.delete("/users/:id", deleteUser);
+router.delete("/users/:id", protect, adminOnly, deleteUser);
 
 export default router;

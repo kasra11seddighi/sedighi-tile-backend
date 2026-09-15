@@ -1,0 +1,9 @@
+{
+  "platform": "node",
+  "app": "sedighi-tile-backend",
+  "port": 3000,
+  "healthCheck": {
+    "command": [],
+    "path": "/health"
+  }
+}
