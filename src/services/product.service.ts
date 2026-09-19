@@ -1,6 +1,7 @@
 import { Product } from "../models/Product.model";
 import { ApiError } from "../utils/ApiError";
 import { slugify } from "../utils/slugify";
+import { buildProductFilter } from "../filters/productFilter";
 import {
   CreateProductInput,
   UpdateProductInput,
@@ -8,58 +9,18 @@ import {
 } from "../validations/product.validation";
 
 export const getAllProducts = async (query: GetProductsQuery) => {
-  const {
-    search,
-    category,
-    brand,
-    size,
-    style,
-    color,
-    location,
-    minPrice,
-    maxPrice,
-    page = 1,
-    limit = 12,
-    sort = "-createdAt",
-  } = query;
+  const { page = 1, limit = 12, sort = "-createdAt" } = query;
 
-  const filter: Record<string, unknown> = { isActive: true };
+  const { filter, isImpossible } = await buildProductFilter(query);
 
-  if (search) {
-    filter.$text = { $search: search };
-  }
-
-  if (category) {
-    filter.category = category;
-  }
-
-  if (brand) {
-    filter.brand = brand;
-  }
-
-  // sizes/styles/colors/locations روی محصول آرایه‌ان؛ پاس دادن یک id
-  // تکی به موتور Mongo خودکار یعنی «آرایه شامل این id باشه»
-  if (size) {
-    filter.sizes = size;
-  }
-
-  if (style) {
-    filter.styles = style;
-  }
-
-  if (color) {
-    filter.colors = color;
-  }
-
-  if (location) {
-    filter.locations = location;
-  }
-
-  if (minPrice !== undefined || maxPrice !== undefined) {
-    const priceFilter: { $gte?: number; $lte?: number } = {};
-    if (minPrice !== undefined) priceFilter.$gte = minPrice;
-    if (maxPrice !== undefined) priceFilter.$lte = maxPrice;
-    filter.price = priceFilter;
+  // یکی از فیلترهای رفرنسی (مثلاً یک slug رنگ اشتباه) هیچ سندی resolve
+  // نکرده؛ query رو اصلاً به Mongo نمی‌فرستیم چون نتیجه‌ش قطعاً خالیه.
+  if (isImpossible) {
+    return {
+      products: [],
+      data: [],
+      pagination: { total: 0, page, pages: 0, limit },
+    };
   }
 
   const skip = (page - 1) * limit;
@@ -77,6 +38,8 @@ export const getAllProducts = async (query: GetProductsQuery) => {
 
   return {
     products,
+    // برای سازگاری با هر جای فرانت که res.data.data رو می‌خونه
+    data: products,
     pagination: {
       total,
       page,

@@ -127,24 +127,44 @@ export const updateProductSchema = z
   })
   .superRefine(validateSaleUnitConsistency);
 
+// یک مقدار فیلتر می‌تونه id باشه، slug باشه، چندتایی با کاما، یا چند بار
+// توی کوئری تکرار شده باشه (?color=a&color=b). همه رو به آرایه‌ی رشته تبدیل
+// می‌کنیم و تصمیم‌گیری درباره‌ی id/slug رو به سرویس می‌سپاریم.
+const filterValues = z
+  .union([z.string(), z.array(z.string())])
+  .optional()
+  .transform((v) => {
+    if (v === undefined) return undefined;
+    const list = (Array.isArray(v) ? v : v.split(","))
+      .map((item) => item.trim())
+      .filter(Boolean);
+    return list.length ? list : undefined;
+  });
+
 export const getProductsQuerySchema = z.object({
   search: z.string().trim().optional(),
-  category: objectId.optional(),
-  brand: objectId.optional(),
+  category: filterValues,
+  brand: filterValues,
   // فیلترهای مبتنی بر همون رفرنس‌هایی که فایندر کاشی هم استفاده می‌کنه
-  // (TileFinderSize/Style/Color/Location) - هر کدوم یک id تکی برای فیلتر
-  size: objectId.optional(),
-  style: objectId.optional(),
-  color: objectId.optional(),
-  location: objectId.optional(),
+  // (TileFinderSize/Style/Color/Location)
+  size: filterValues,
+  style: filterValues,
+  color: filterValues,
+  location: filterValues,
   minPrice: z.coerce.number().min(0).optional(),
   maxPrice: z.coerce.number().min(0).optional(),
   page: z.coerce.number().min(1).optional(),
   limit: z.coerce.number().min(1).max(100).optional(),
-  // قبلاً z.string() آزاد بود؛ محدودش می‌کنیم به همون مقادیری که واقعاً
-  // پشتیبانی می‌شن (همون‌هایی که توی ProductSortOption ثبت می‌کنیم) تا کسی
-  // نتونه یه فیلد دلخواه رو به‌عنوان sort پاس بده.
-  sort: z.enum(SORT_OPTION_VALUES).optional(),
+  // مقدار نامعتبر رو به‌جای خطای ۴۰۰، به پیش‌فرض برمی‌گردونیم تا یک
+  // پارامتر اشتباه سمت فرانت، کل لیست محصولات رو خالی نکنه.
+  sort: z
+    .string()
+    .optional()
+    .transform((v) =>
+      v && (SORT_OPTION_VALUES as readonly string[]).includes(v)
+        ? (v as (typeof SORT_OPTION_VALUES)[number])
+        : undefined,
+    ),
 });
 
 export type CreateProductInput = z.infer<typeof createProductSchema>;
