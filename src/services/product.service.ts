@@ -57,8 +57,12 @@ export const getAllProductsAdmin = async () => {
     .sort({ createdAt: -1 });
 };
 
-export const getProductById = async (id: string) => {
-  const product = await Product.findById(id)
+export const getProductById = async (idOrSlug: string) => {
+  const query = /^[0-9a-fA-F]{24}$/.test(idOrSlug)
+    ? { _id: idOrSlug }
+    : { slug: idOrSlug };
+
+  const product = await Product.findOne(query)
     .populate("category", "name slug showPrice")
     .populate("brand", "name logo")
     .populate("locations", "name slug")
