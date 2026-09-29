@@ -1,5 +1,4 @@
 import { Model } from "mongoose";
-import { Product } from "../models/Product.model";
 import { Category } from "../models/Category.model";
 import { Brand } from "../models/Brand.model";
 import { TileFinderSize } from "../models/TileFinderSize.model";
@@ -10,7 +9,8 @@ import { GetProductsQuery } from "../validations/product.validation";
 
 const OBJECT_ID_RE = /^[0-9a-fA-F]{24}$/;
 
-const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const escapeRegex = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /**
  * مقادیر ورودی یک فیلتر (مثلاً size=6a76...,silver-gray) می‌تونن ترکیبی از
@@ -62,12 +62,37 @@ const REF_CONFIG: Array<{
   productField: string;
   textFields: string[];
 }> = [
-  { key: "category", model: Category, productField: "category", textFields: ["slug", "name"] },
+  {
+    key: "category",
+    model: Category,
+    productField: "category",
+    textFields: ["slug", "name"],
+  },
   { key: "brand", model: Brand, productField: "brand", textFields: ["name"] },
-  { key: "size", model: TileFinderSize, productField: "sizes", textFields: ["slug", "name"] },
-  { key: "style", model: TileFinderStyle, productField: "styles", textFields: ["slug", "name"] },
-  { key: "color", model: TileFinderColor, productField: "colors", textFields: ["slug", "name"] },
-  { key: "location", model: TileFinderLocation, productField: "locations", textFields: ["slug", "name"] },
+  {
+    key: "size",
+    model: TileFinderSize,
+    productField: "sizes",
+    textFields: ["slug", "name"],
+  },
+  {
+    key: "style",
+    model: TileFinderStyle,
+    productField: "styles",
+    textFields: ["slug", "name"],
+  },
+  {
+    key: "color",
+    model: TileFinderColor,
+    productField: "colors",
+    textFields: ["slug", "name"],
+  },
+  {
+    key: "location",
+    model: TileFinderLocation,
+    productField: "locations",
+    textFields: ["slug", "name"],
+  },
 ];
 
 /**
